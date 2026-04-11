@@ -1,6 +1,5 @@
 {
   "name": "my-claude-devteam",
-  "description": "Claude Code Dev Team — 8 specialized subagents + 11 automation hooks + P7/P9/P10 methodology.",
   "owner": {
     "name": "NYCU-Chung",
     "url": "https://github.com/NYCU-Chung"
