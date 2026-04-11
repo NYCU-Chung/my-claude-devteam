@@ -1,5 +1,7 @@
 # The Team
 
+**English · [繁體中文](./README.zh-TW.md)**
+
 Twelve specialized agents that replace "one Claude, many prompts" with "one request, a full engineering team".
 
 ## Roster

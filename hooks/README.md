@@ -1,5 +1,7 @@
 # Hooks
 
+**English · [繁體中文](./README.zh-TW.md)**
+
 Fifteen automation hooks that run at Claude Code's lifecycle events (`PreToolUse`, `PostToolUse`, `Stop`, `SessionStart`). They catch common failure modes before they ship: hardcoded secrets, debugger statements, MCP outages, runaway cost, AI-slop UI, stale `console.log`, and more.
 
 Each hook is a self-contained script under 75 lines. No external dependencies beyond Node.js and standard Unix tools (`jq`, `git`, `grep`).
