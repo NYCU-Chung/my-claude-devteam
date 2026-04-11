@@ -122,6 +122,40 @@
 
 ---
 
+## 實戰心得
+
+以下是日常使用的真實觀察。你的體驗可能不同。
+
+### `critic` 是 MVP
+
+在中型模組（500–2000 行）上，`critic` 常態找到 **20–30 個問題**，橫跨四個嚴重度等級。在大型開源專案（OpenClaw 352K⭐、Mermaid 87K⭐、Storybook 85K⭐、React Router 56K⭐）上，單次聚焦審查仍然能挖出 **5–10 個真實 bug**，都是 issue tracker 上沒人報告過的。
+
+真實戰績：
+- 在一個 352K 星的 repo 裡找到 **連續三個 security-hardening PR 都漏掉的** CWE-208 timing-safe 比較漏洞（diffs store 用 `!==` 而不是 `safeEqualSecret`）
+- 找到一個 auth 相關 allowlist 檔案的非原子 `writeFileSync` race condition，併發存取時會導致狀態損毀
+- 找到一個 Ollama 推理模型辨識正則（`/r1/`）誤判不相關模型為 thinking model
+
+它的嚴格（「預設一切都有問題，直到你確認沒有為止」）就是它有用的原因。
+
+### `debugger` 救你免於公開打臉
+
+同一次 bug 狩獵 session，作者兩次差點基於看似清楚的 repro 直接發 PR。兩次都是 `debugger` 在 HEAD 上追蹤行為後，發現 bug **其實已經被默默修掉了** — 原始回報者用的是舊版。發出去會超尷尬。
+
+- **Svelte #18083** — 無限迴圈 reconcile bug。結果是 5.43.8 引入的回歸，已在 5.44.0+ 被 #17191 / #17240 / #17550 修復。`debugger` 在 HEAD 跑 repro 測試直接 pass。
+- **Mermaid #6953** — sequence diagram alias+type 組合。11.14.0 已經由 PR #7136 修好了，issue 只是沒人關而已。
+
+慢速方法論（「先重現，再建假設，再驗證」）的重點就是在這裡。
+
+### `planner` 取代需求釐清的來回
+
+任務涉及 3+ 檔案時，先派 `planner` 可以把 30 則對話的釐清過程變成一份結構化 Task Prompt。**六要素契約**（目標 / 範圍 / 輸入 / 輸出 / 驗收 / 邊界）逼你在有人動筆之前先把 Definition of Done 寫清楚。
+
+### `vuln-verifier` 無聊得剛剛好
+
+大多數「漏洞」報告其實是誤報或半真半假。**PoC-or-it-didn't-happen** 協議把「我覺得這裡可能可以被打」的模糊報告變成帶有實際程式輸出的判定。每個判定都附攻擊輸入 **和** 正常對照輸入 — 所以你能證明漏洞行為是被攻擊觸發的，不是任何輸入都會觸發。
+
+---
+
 ## 一鍵安裝
 
 ```

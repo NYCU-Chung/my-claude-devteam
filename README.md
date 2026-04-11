@@ -122,6 +122,40 @@ Each hook is a self-contained script. Enable / disable / customize in `settings.
 
 ---
 
+## From the Field
+
+Real observations from daily use. Your mileage may vary.
+
+### `critic` is the MVP
+
+On mid-sized modules (500–2000 lines), `critic` routinely finds **20–30 issues** across all severity tiers. On large open-source codebases (tested against OpenClaw 352K⭐, Mermaid 87K⭐, Storybook 85K⭐, React Router 56K⭐), a single focused audit still surfaces **5–10 real bugs** that had not been reported in the issue tracker.
+
+Notable catches from real audits:
+- A CWE-208 timing-safe comparison gap in a 352K-star repo that **three prior security-hardening PRs had missed** (diffs store `!==` vs `safeEqualSecret`)
+- A non-atomic `writeFileSync` race in an auth-adjacent allowlist file that would corrupt state under concurrent access
+- An Ollama reasoning-model heuristic regex (`/r1/`) that misidentified unrelated models as thinking models
+
+The strictness ("assume everything is broken until proven otherwise") is what makes it work.
+
+### `debugger` saves you from face-plants
+
+Twice during one bug-hunting session, the author was about to submit PRs based on seemingly clear reproductions. Both times `debugger` traced the behavior on HEAD and found the bugs had **already been silently fixed** in recent commits — the original reporters were on outdated versions. Submitting would have been embarrassing.
+
+- **Svelte #18083** — infinite-loop reconcile bug. Turned out to be a regression introduced in 5.43.8 that was fixed in 5.44.0+ by #17191 / #17240 / #17550. `debugger` ran the repro on HEAD and the test passed.
+- **Mermaid #6953** — sequence diagram alias+type combo. Already shipped in 11.14.0 via PR #7136; the issue just hadn't been closed.
+
+The slow methodology ("reproduce, then hypothesize, then verify") is the whole point.
+
+### `planner` replaces the clarification loop
+
+On tasks touching 3+ files, dispatching to `planner` first turns a 30-message back-and-forth into one structured Task Prompt. The **six-element contract** (goal / scope / input / output / acceptance / boundaries) forces you to state the Definition of Done before anyone writes code.
+
+### `vuln-verifier` is boring in the best way
+
+Most reported "vulnerabilities" are false positives or partially true. The **PoC-or-it-didn't-happen** protocol converts fuzzy "I think this could be exploited" reports into verdicts with actual program output. Every verdict comes with an attack input **and** a baseline control input — so you prove the vulnerable behavior is triggered by the attack and not by any input.
+
+---
+
 ## Install (One Command)
 
 ```
