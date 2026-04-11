@@ -1,7 +1,9 @@
 # Claude Code Dev Team
 
+**English · [繁體中文](./README.zh-TW.md)**
+
 > **An entire engineering team for Claude Code**
-> — 7 specialized agents, 11 automation hooks, and the P7/P9/P10 methodology that keeps them disciplined.
+> — 8 specialized agents, 11 automation hooks, and the P7/P9/P10 methodology that keeps them disciplined.
 
 Most people use Claude Code as a single coder. This config turns it into a full engineering org: **planner, fullstack, debugger, critic, vuln-verifier, frontend-designer, tool-expert, web-researcher** — each agent owns a role, each has its own tool permissions, and a strict delegation rulebook decides who touches what.
 
