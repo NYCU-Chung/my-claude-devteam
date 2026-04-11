@@ -8,8 +8,8 @@
   "plugins": [
     {
       "name": "devteam",
-      "description": "An engineering team in a box. Installs 8 subagents and 11 hooks in one command. Includes the P7/P9/P10 methodology and three red lines discipline.",
-      "version": "1.0.0",
+      "description": "An engineering team in a box. Installs 12 subagents and 15 hooks in one command. Includes the P7/P9/P10 methodology and three red lines discipline.",
+      "version": "1.1.0",
       "source": "./",
       "author": {
         "name": "NYCU-Chung",

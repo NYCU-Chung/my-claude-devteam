@@ -1,21 +1,34 @@
 # The Team
 
-Eight specialized agents that replace "one Claude, many prompts" with "one request, a full engineering team".
+Twelve specialized agents that replace "one Claude, many prompts" with "one request, a full engineering team".
 
 ## Roster
 
+### Build & ship
 | Agent | Role | Model | Tools | Primary job |
 |-------|------|-------|-------|-------------|
 | [`planner`](./planner.md) | Tech Lead | opus | Read-only | Breaks fuzzy requirements into Task Prompts with a six-element contract. Never writes code. |
 | [`fullstack-engineer`](./fullstack-engineer.md) | Senior Engineer | sonnet | Read/Write | Ships features using the P7 methodology. Self-reviews before handoff. |
 | [`frontend-designer`](./frontend-designer.md) | Designer | sonnet | Read/Write | Builds memorable UI with a committed aesthetic direction. Rejects AI slop. |
+| [`refactor-specialist`](./refactor-specialist.md) | Refactor Lead | opus | Read/Write | Large-scale safe refactors. Atomic commits, full callsite verification. |
+| [`migration-engineer`](./migration-engineer.md) | Migration Lead | opus | Read/Write | Framework / library major-version upgrades. Incremental, verified, reversible. |
+
+### Quality & safety
+| Agent | Role | Model | Tools | Primary job |
+|-------|------|-------|-------|-------------|
 | [`critic`](./critic.md) | Code Reviewer | opus | Read-only | Finds bugs, security holes, edge cases. Every finding with file:line + fix direction. |
 | [`vuln-verifier`](./vuln-verifier.md) | Pentester | opus | Read-only | Takes critic findings and writes real PoCs to confirm. No false positives. |
 | [`debugger`](./debugger.md) | Debug Engineer | opus | Read-only | Reads logs, builds hypotheses, verifies, fixes. Never guesses. |
+| [`db-expert`](./db-expert.md) | DB Specialist | opus | Read-only | Reviews schemas, migrations, queries for safety, indexes, race conditions. |
+
+### Discovery & support
+| Agent | Role | Model | Tools | Primary job |
+|-------|------|-------|-------|-------------|
+| [`onboarder`](./onboarder.md) | Codebase Explorer | opus | Read-only | First-time codebase exploration. Builds a structured mental model in one report. |
 | [`tool-expert`](./tool-expert.md) | Platform Engineer | sonnet | All | Picks the right tool, chains workflows, troubleshoots tool failures. |
 | [`web-researcher`](./web-researcher.md) | Librarian | sonnet | WebSearch/WebFetch | Turns uncertainty into verified facts with sources. |
 
-> **Note on tools**: agents have the minimum tools they need. `planner`, `critic`, `vuln-verifier`, and `debugger` are read-only — they analyze and produce reports, they don't modify files. Execution agents (`fullstack-engineer`, `frontend-designer`, `tool-expert`) have `Edit`/`Write`.
+> **Note on tools**: agents have the minimum tools they need. Read-only agents (`planner`, `critic`, `vuln-verifier`, `debugger`, `db-expert`, `onboarder`) analyze and produce reports without modifying files. Execution agents (`fullstack-engineer`, `frontend-designer`, `refactor-specialist`, `migration-engineer`, `tool-expert`) have `Edit` / `Write`.
 
 ## Delegation Matrix
 
@@ -24,25 +37,29 @@ When the parent Claude gets a request, it uses this matrix to decide who to disp
 | The request | Dispatch to |
 |-------------|-------------|
 | "Add a new feature / endpoint / module" | `fullstack-engineer` (P7 flow) |
-| "Refactor this across 3+ files" | `planner` first, then parallel `fullstack-engineer` |
+| "Refactor this across 10+ files" | `refactor-specialist` |
+| "Refactor this across 3–9 files" | `planner` first, then parallel `fullstack-engineer` |
+| "Upgrade this framework / library" | `migration-engineer` |
 | "Design a new landing page / dashboard" | `frontend-designer` |
 | "Fix the bug in X" | `debugger` first, then `fullstack-engineer` for the fix |
 | "Review this diff before we merge" | `critic` |
+| "Review this schema / migration / query" | `db-expert` |
 | "Audit this code for security issues" | `critic` (which may hand off to `vuln-verifier`) |
 | "Confirm this vulnerability is real" | `vuln-verifier` |
 | "Why is the service crashing?" | `debugger` |
+| "What does this codebase do?" | `onboarder` |
 | "How does API X work?" | `web-researcher` |
 | "Why is this MCP tool failing?" | `tool-expert` |
 | "Plan a big refactor that touches 3 services" | `planner` |
 
 ## Workflow Patterns
 
-### Pattern 1: Small, clear task (single agent)
+### Pattern 1: Small, clear task
 ```
 You → fullstack-engineer → [P7-COMPLETION]
 ```
 
-### Pattern 2: Change with review (two agents)
+### Pattern 2: Change with review
 ```
 You → fullstack-engineer → [P7-COMPLETION]
      → critic (review the diff)
@@ -59,8 +76,8 @@ You → debugger (find root cause)
 ### Pattern 4: Complex multi-module change
 ```
 You → planner (decomposes into N Task Prompts)
-     → fullstack-engineer × N (parallel execution, one per subtask)
-     → critic × N (parallel review of each subtask)
+     → fullstack-engineer × N (parallel, one per subtask)
+     → critic × N (parallel review of each)
      → integration check against Definition of Done
 ```
 
@@ -84,6 +101,38 @@ You → frontend-designer
 You → web-researcher (look up the official API spec)
      → fullstack-engineer (implement against the verified spec)
      → critic (review)
+```
+
+### Pattern 8: Joining a new codebase
+```
+You → onboarder (produce codebase map)
+     → planner (use the map to plan your first contribution)
+```
+
+### Pattern 9: Schema / migration change
+```
+You → fullstack-engineer (drafts the migration)
+     → db-expert (reviews for safety, locks, rollback path)
+     → (if findings) fullstack-engineer revises → db-expert re-reviews
+     → critic (final pre-merge review)
+```
+
+### Pattern 10: Large refactor
+```
+You → refactor-specialist
+     → reconnaissance: list every callsite
+     → atomic commits, verifying at each step
+     → [REFACTOR-COMPLETE]
+     → critic (final diff review)
+```
+
+### Pattern 11: Framework upgrade
+```
+You → migration-engineer
+     → reads upstream changelog
+     → produces migration plan with breaking-change checklist
+     → executes incrementally, verifying at each step
+     → [MIGRATION-COMPLETE]
 ```
 
 ## Parallel Dispatch
@@ -153,8 +202,8 @@ For private tooling (deployment scripts, VPS ops, custom integrations), put thos
 
 | Use case | Model | Why |
 |----------|-------|-----|
-| Critical thinking, code review, debugging, planning | `opus` | These tasks require deep reasoning; a wrong answer costs more than the extra inference tokens. |
-| Feature implementation, design, tool orchestration | `sonnet` | Execution tasks benefit from speed and cost-efficiency; patterns are well-defined, reasoning overhead is lower. |
+| Critical thinking, code review, debugging, planning, schema review | `opus` | High-stakes reasoning; a wrong answer costs more than the extra inference tokens. |
+| Feature implementation, design, tool orchestration | `sonnet` | Execution tasks benefit from speed and cost-efficiency; patterns are well-defined. |
 | Pure lookup / research | `sonnet` | No synthesis needed beyond source evaluation. |
 
 Adjust for your budget and latency needs — the methodology works at any tier.

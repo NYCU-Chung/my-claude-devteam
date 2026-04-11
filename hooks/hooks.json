@@ -1,6 +1,5 @@
 {
-  "description": "Claude Code Dev Team hooks: commit quality, cost tracking, MCP health, config protection, design quality, batch format, audit log, compact suggestion, error logging.",
-
+  "description": "Claude Code Dev Team hooks (15 total): commit quality, cost tracking, MCP health, config protection, design quality, batch format, audit log, compact suggestion, error logging, test runner, branch protection, large file warner, session summary.",
   "hooks": {
     "PreToolUse": [
       {
@@ -20,6 +19,11 @@
             "type": "command",
             "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const i=JSON.parse(d);const cmd=i.tool_input?.command||'';if(/--no-verify/.test(cmd)){process.stderr.write('[devteam] BLOCKED: --no-verify is not allowed. Let git hooks run.\\n');process.exit(2)}process.stdout.write(d)})\"",
             "description": "Block --no-verify flag (git hooks must run)"
+          },
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/branch-protection.js",
+            "description": "Block direct commits / force pushes on main / master / production"
           },
           {
             "type": "command",
@@ -57,9 +61,18 @@
             "description": "Check MCP server health before tool execution"
           }
         ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/large-file-warner.js",
+            "description": "Warn at 500KB, block at 2MB to protect context"
+          }
+        ]
       }
     ],
-
     "PostToolUse": [
       {
         "matcher": ".*",
@@ -94,11 +107,16 @@
             "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/design-quality.js",
             "timeout": 10,
             "description": "Warn on generic template-looking frontend UI"
+          },
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/test-runner.js",
+            "timeout": 60,
+            "description": "Run sibling test files and report failures"
           }
         ]
       }
     ],
-
     "PostToolUseFailure": [
       {
         "matcher": "mcp__.*",
@@ -111,7 +129,6 @@
         ]
       }
     ],
-
     "Stop": [
       {
         "matcher": "*",
@@ -131,18 +148,22 @@
             "type": "command",
             "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/cost-tracker.js",
             "description": "Track token usage and estimated cost per response"
+          },
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/session-summary.js",
+            "description": "Append session summary to ~/.claude/sessions/ for later search"
           }
         ]
       }
     ],
-
     "SessionStart": [
       {
         "matcher": "startup|resume",
         "hooks": [
           {
             "type": "command",
-            "command": "echo '[devteam] Dev team online — 8 agents + 11 hooks active. Three red lines: closure discipline, fact-driven, exhaustiveness.' >&2; exit 0"
+            "command": "echo '[devteam] Dev team online — 12 agents + 15 hooks active. Three red lines: closure discipline, fact-driven, exhaustiveness.' >&2; exit 0"
           }
         ]
       }

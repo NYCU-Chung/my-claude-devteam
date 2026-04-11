@@ -3,9 +3,9 @@
 **English · [繁體中文](./README.zh-TW.md)**
 
 > **An entire engineering team for Claude Code**
-> — 8 specialized agents, 11 automation hooks, and the P7/P9/P10 methodology that keeps them disciplined.
+> — 12 specialized agents, 15 automation hooks, and the P7/P9/P10 methodology that keeps them disciplined.
 
-Most people use Claude Code as a single coder. This config turns it into a full engineering org: **planner, fullstack, debugger, critic, vuln-verifier, frontend-designer, tool-expert, web-researcher** — each agent owns a role, each has its own tool permissions, and a strict delegation rulebook decides who touches what.
+Most people use Claude Code as a single coder. This config turns it into a full engineering org: **planner, fullstack-engineer, refactor-specialist, migration-engineer, frontend-designer, critic, vuln-verifier, debugger, db-expert, onboarder, tool-expert, web-researcher** — each agent owns a role, each has its own tool permissions, and a strict delegation rulebook decides who touches what.
 
 Backed by **corporate-culture-inspired discipline** (closure, fact-driven, exhaustiveness) and **battle-tested hooks** that catch debugger statements, hardcoded secrets, cost overruns, and MCP outages before they hit main.
 
@@ -17,10 +17,14 @@ Backed by **corporate-culture-inspired discipline** (closure, fact-driven, exhau
 |------|-------|--------------|---------------|
 | 📋 **Tech Lead** | `planner` | Breaks down fuzzy requirements into parallelizable Task Prompts with a six-element contract (goal / scope / input / output / acceptance / boundaries). Never writes code. | Task touches 3+ files or 2+ modules |
 | 🛠 **Senior Engineer** | `fullstack-engineer` | Ships features using the P7 methodology: read reality → design solution → impact analysis → implement → three-question self-review → `[P7-COMPLETION]` delivery. | Single-feature or cross-module implementation |
+| 🔄 **Refactor Lead** | `refactor-specialist` | Large-scale safe refactors. Atomic commits, full callsite verification, single-revert rollback. | Renames, file moves, module extraction across 10+ files |
+| 🚀 **Migration Lead** | `migration-engineer` | Framework / library major-version upgrades. Reads upstream changelog, executes incrementally, verifies at every step. | Next.js 13→14, Vue 2→3, Tailwind 3→4, etc. |
 | 🎨 **Designer** | `frontend-designer` | Builds landing pages, dashboards, and UI that doesn't look like AI slop. Opinionated aesthetic direction, refuses generic output. | New pages, UI redesigns, visual upgrades |
 | 🔍 **Code Reviewer** | `critic` | Finds bugs, security holes, logic errors, edge cases, performance issues. Every finding with file path + line number. No "looks good to me". | Pre-commit, pre-deploy, pre-merge |
 | 🧪 **Pentester** | `vuln-verifier` | Takes the critic's findings and writes actual PoC tests to prove the vulnerability is real — no false positives, no hand-waving. | After critic flags a security issue |
 | 🐛 **Debug Engineer** | `debugger` | Reads logs, constructs hypotheses, verifies, fixes. Never guesses, always traces root cause. Includes log-analyzer. | Bug reports, service incidents, test failures |
+| 🗄 **DB Specialist** | `db-expert` | Reviews schemas, migrations, queries for safety, indexes, locks, race conditions. Paranoid about data loss. | Schema changes, migrations, query optimization |
+| 🗺 **Onboarder** | `onboarder` | First-time codebase exploration. Produces a structured mental model — architecture, entry points, suspicious areas. | Joining a new project, evaluating an open-source repo |
 | ⚙️ **Tool Expert** | `tool-expert` | Picks the right MCP tools, chains complex workflows, troubleshoots tool failures. Knows every integration in your stack. | MCP tool failures, complex tool chaining |
 | 📚 **Researcher** | `web-researcher` | Fetches and synthesizes official docs, API specs, error code meanings. The antidote to hallucination. | Uncertain API usage, error code lookups |
 
@@ -102,7 +106,7 @@ The team shifts into exhaustive mode when:
 
 ## The Automation (Hooks)
 
-Eleven automation hooks wire up at `pre-commit`, `post-tool-use`, and `stop` events. They catch problems before they ship.
+Fifteen automation hooks wire up at `pre-commit`, `post-tool-use`, and `stop` events. They catch problems before they ship.
 
 | Hook | Trigger | What it catches |
 |------|---------|-----------------|
@@ -117,6 +121,10 @@ Eleven automation hooks wire up at `pre-commit`, `post-tool-use`, and `stop` eve
 | 💡 `suggest-compact.js` | Context pressure | Suggests `/compact` when context window fills up |
 | 📈 `accumulator.js` | Session tracking | Accumulates session metrics |
 | 🚨 `log-error.sh` | Any error | Unified error logging to `~/.claude/error-log.md` |
+| 🧪 `test-runner.js` | After file edit | Finds sibling test file, runs vitest/jest, reports failures (non-blocking) |
+| 🔒 `branch-protection.js` | Pre-Bash | Hard-blocks force pushes and direct commits to main / master / production / release |
+| 📏 `large-file-warner.js` | Pre-Read | Warns at 500 KB, blocks at 2 MB to protect context window |
+| 📚 `session-summary.js` | Stop | Appends session summary to `~/.claude/sessions/` for later search |
 
 Each hook is a self-contained script. Enable / disable / customize in `settings.example.json`.
 

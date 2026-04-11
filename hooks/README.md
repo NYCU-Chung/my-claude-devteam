@@ -1,6 +1,6 @@
 # Hooks
 
-Eleven automation hooks that run at Claude Code's lifecycle events (`PreToolUse`, `PostToolUse`, `Stop`, `SessionStart`). They catch common failure modes before they ship: hardcoded secrets, debugger statements, MCP outages, runaway cost, AI-slop UI, stale `console.log`, and more.
+Fifteen automation hooks that run at Claude Code's lifecycle events (`PreToolUse`, `PostToolUse`, `Stop`, `SessionStart`). They catch common failure modes before they ship: hardcoded secrets, debugger statements, MCP outages, runaway cost, AI-slop UI, stale `console.log`, and more.
 
 Each hook is a self-contained script under 75 lines. No external dependencies beyond Node.js and standard Unix tools (`jq`, `git`, `grep`).
 
@@ -91,6 +91,35 @@ Uses a session-scoped temp file (`claude-edited-<session-hash>.txt`) to track wh
 ```
 
 Use this as your personal error journal — fill in solutions after you fix each one, and search it when you hit a similar error later.
+
+### 🧪 `test-runner.js`
+**Fires:** `PostToolUse` on `Write | Edit`
+**What it does:** Whenever a JS/TS source file is edited, looks for a sibling test file (`foo.test.ts`, `foo.spec.ts`, `__tests__/foo.test.ts`) and runs it via vitest or jest (whichever is in `node_modules/.bin`). Failures are printed to stderr but do not block. Skips if no test runner is installed.
+
+### 🔒 `branch-protection.js`
+**Fires:** `PreToolUse` on `Bash`
+**What it does:** Detects git operations on protected branches (`main`, `master`, `production`, `release`, `prod`).
+
+- **Hard block**: force push to a protected branch
+- **Hard block**: `git commit` while currently on a protected branch
+- **Warn**: any merge / rebase / reset / cherry-pick / revert / checkout on a protected branch
+
+Forces feature-branch workflow without ever silently allowing a direct commit to main.
+
+### 📏 `large-file-warner.js`
+**Fires:** `PreToolUse` on `Read`
+**What it does:** Checks file size before reading.
+
+- **Warn at 500 KB**: suggests using `offset` / `limit`
+- **Hard block at 2 MB**: forces use of partial reads or `Grep` to avoid burning context
+
+Skips the check if `offset` or `limit` is already set.
+
+### 📚 `session-summary.js`
+**Fires:** `Stop`
+**What it does:** Appends a structured session summary to `~/.claude/sessions/<date>-<session-id>.md`. Includes the working directory, current `git status --short`, and recent commit log.
+
+Use case: search past sessions later (`grep -r "TimeoutError" ~/.claude/sessions/`) to find how you solved a problem the first time.
 
 ## Install
 

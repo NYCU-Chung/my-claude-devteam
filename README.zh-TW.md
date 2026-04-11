@@ -3,9 +3,9 @@
 **[English](./README.md) · 繁體中文**
 
 > **把 Claude Code 變成一整支工程團隊**
-> — 8 位專職 agents、11 個自動化 hooks，還有讓他們保持紀律的 P7/P9/P10 方法論。
+> — 12 位專職 agents、15 個自動化 hooks，還有讓他們保持紀律的 P7/P9/P10 方法論。
 
-大多數人把 Claude Code 當單人工程師用。這個設定把它變成一整個工程組織：**planner、fullstack、debugger、critic、vuln-verifier、frontend-designer、tool-expert、web-researcher** — 每個 agent 負責一個角色、擁有各自的工具權限，並由嚴格的委派規則決定誰該動哪裡。
+大多數人把 Claude Code 當單人工程師用。這個設定把它變成一整個工程組織：**planner、fullstack-engineer、refactor-specialist、migration-engineer、frontend-designer、critic、vuln-verifier、debugger、db-expert、onboarder、tool-expert、web-researcher** — 每個 agent 負責一個角色、擁有各自的工具權限，並由嚴格的委派規則決定誰該動哪裡。
 
 背後有 **阿里味大廠文化的紀律**（閉環意識、事實驅動、窮盡一切），搭配 **實戰打磨的 hooks**，在 debugger 語句、硬編密碼、成本失控、MCP 斷線等問題進 main 之前就攔下來。
 
@@ -17,10 +17,14 @@
 |------|-------|--------|-------------|
 | 📋 **Tech Lead** | `planner` | 把模糊需求拆成可平行執行的 Task Prompts，每個子任務都有六要素契約（目標 / 範圍 / 輸入 / 輸出 / 驗收 / 邊界）。絕不下場寫程式。 | 任務涉及 3+ 檔案或 2+ 模組 |
 | 🛠 **Senior Engineer** | `fullstack-engineer` | 用 P7 方法論交付功能：讀懂現況 → 方案設計 → 影響分析 → 實施 → 三問自審 → `[P7-COMPLETION]`。 | 單一功能或跨模組實作 |
+| 🔄 **Refactor Lead** | `refactor-specialist` | 大規模安全重構：原子 commit、完整 callsite 驗證、單次 revert 即可回滾。 | Rename、移檔案、抽元件，影響 10+ 檔案時 |
+| 🚀 **Migration Lead** | `migration-engineer` | Framework / 函式庫主版本升級。讀上游 changelog，分階段執行、每步驗證。 | Next.js 13→14、Vue 2→3、Tailwind 3→4 等 |
 | 🎨 **Designer** | `frontend-designer` | 打造讓人記住的 landing page、dashboard、UI 元件。拒絕 AI slop，堅持鮮明美學方向。 | 新頁面、UI 重設計、視覺升級 |
 | 🔍 **Code Reviewer** | `critic` | 找 bug、安全漏洞、邏輯錯誤、邊界條件、效能問題。每個發現都附檔案路徑+行號。不說「看起來沒問題」。 | Commit 前、部署前、Merge 前 |
 | 🧪 **Pentester** | `vuln-verifier` | 接 critic 找到的漏洞，實際寫 PoC 測試證明漏洞是真是假。零誤報、零空口白話。 | critic 標出安全問題之後 |
 | 🐛 **Debug Engineer** | `debugger` | 讀 log、建立假設、驗證、修復。不猜測，只追根本原因。含 log 分析。 | Bug 回報、服務異常、測試失敗 |
+| 🗄 **DB Specialist** | `db-expert` | 審查 schema、migration、query 的安全性、索引、鎖、race condition。對 data loss 偏執。 | Schema 變更、migration 審查、query 優化 |
+| 🗺 **Onboarder** | `onboarder` | 第一次接觸 codebase 時用，產出結構化的 mental model — 架構、entry point、可疑區域。 | 接手新專案、評估開源 repo |
 | ⚙️ **Tool Expert** | `tool-expert` | 選最適合的 MCP 工具、串接複雜工作流程、排查工具失敗。對整個工具堆疊瞭若指掌。 | MCP 工具失敗、複雜工具串接 |
 | 📚 **Researcher** | `web-researcher` | 抓取並整理官方文件、API spec、錯誤碼含義。幻覺的剋星。 | API 用法不確定、錯誤碼查詢 |
 
@@ -102,7 +106,7 @@
 
 ## 自動化（Hooks）
 
-11 個自動化 hooks 接在 `pre-commit`、`post-tool-use`、`stop` 等事件上，在問題上 production 前就攔下來。
+15 個自動化 hooks 接在 `pre-commit`、`post-tool-use`、`stop` 等事件上，在問題上 production 前就攔下來。
 
 | Hook | 觸發時機 | 攔截什麼 |
 |------|---------|---------|
@@ -117,6 +121,10 @@
 | 💡 `suggest-compact.js` | Context 壓力 | 在對話變長時建議 `/compact` |
 | 📈 `accumulator.js` | Session 追蹤 | 累積 session 期間編輯的檔案 |
 | 🚨 `log-error.sh` | 任何錯誤 | 統一記錯到 `~/.claude/error-log.md` |
+| 🧪 `test-runner.js` | 檔案編輯後 | 找對應的 test file 跑 vitest/jest，失敗回報但不阻擋 |
+| 🔒 `branch-protection.js` | Pre-Bash | 硬擋 force push 和直接 commit 到 main / master / production |
+| 📏 `large-file-warner.js` | Pre-Read | 500 KB 警告，2 MB 阻擋，保護 context window |
+| 📚 `session-summary.js` | Stop | 把 session 摘要 append 到 `~/.claude/sessions/`，方便日後搜尋 |
 
 每個 hook 都是獨立腳本。透過 `settings.example.json` 啟用 / 關閉 / 自訂。
 

@@ -8,19 +8,23 @@
 
 For complex tasks (multiple files, architectural changes, deployment operations), use TodoWrite first to list the plan, confirm with the user, then execute.
 
-## 8-Agent Expert Team (Subagents)
+## 12-Agent Expert Team (Subagents)
 
-Eight subagents form a collaborative team. Call them with the `Agent` tool (pass the name below as `subagent_type`).
+Twelve subagents form a collaborative team. Call them with the `Agent` tool (pass the name below as `subagent_type`).
 
 | Agent | Name | When to use |
 |-------|------|-------------|
 | Critic | `critic` | Code review, security review, plan review, pre-deploy check |
 | Vulnerability Verifier | `vuln-verifier` | After critic finds a vulnerability, writes an actual PoC to confirm it is real |
-| Tool Expert | `tool-expert` | Picking the best tool combination, chaining complex tool flows, debugging tool failures |
+| Debugger | `debugger` | Bug hunting, log analysis, service incidents, test failures |
+| DB Expert | `db-expert` | Schema design, migration safety, query optimization, index advice |
+| Planner | `planner` | Task decomposition (P9 methodology: strategic breakdown → Task Prompt → delivery closure) |
 | Fullstack Engineer | `fullstack-engineer` | Feature implementation (P7 methodology: design → implement → self-review → [P7-COMPLETION]) |
 | Frontend Designer | `frontend-designer` | New pages, UI redesign, landing pages, dashboards (rejects AI slop) |
-| Debugger | `debugger` | Bug hunting, log analysis, service incidents, test failures |
-| Planner | `planner` | Task decomposition (P9 methodology: strategic breakdown → Task Prompt → delivery closure) |
+| Refactor Specialist | `refactor-specialist` | Large refactors (10+ files): renames, file moves, module extraction |
+| Migration Engineer | `migration-engineer` | Framework / library major-version upgrades, breaking changes |
+| Onboarder | `onboarder` | First-time codebase exploration, builds a mental model in one report |
+| Tool Expert | `tool-expert` | Picking the best tool combination, chaining complex tool flows, debugging tool failures |
 | Web Researcher | `web-researcher` | Looking up official docs, API specs, error codes, version differences |
 
 ---
@@ -136,6 +140,10 @@ When the user says "don't stop", "loop mode", "I'm going to sleep", enter Loop M
 | Finished writing code, about to commit / deploy | `critic` reviews the diff |
 | User reports a bug, service outage, test failure, unexpected behavior | `debugger` — first reaction, never guess |
 | Task touches 3+ files or 2+ modules | `planner` decomposes first (= switch to P9 mode) |
+| Large refactor (10+ files, renames, file moves) | `refactor-specialist` |
+| Framework / library major-version upgrade | `migration-engineer` |
+| Schema / migration / SQL query change | `db-expert` reviews |
+| First time touching this codebase | `onboarder` to build a mental model |
 | Single-feature or cross-module implementation | `fullstack-engineer` (P7 flow) |
 | Security review needed before coding / suspicion of a vulnerability | `critic` (includes security audit) |
 | After critic reports a vulnerability, verify it's real | `vuln-verifier` (writes a PoC) |
@@ -203,5 +211,5 @@ If Claude in Chrome (or any equivalent browser automation tool) is installed, us
 ## Credits
 
 - **P7/P9/P10 methodology and PUA mode** are adapted from [tanweai/pua](https://github.com/tanweai/pua) (MIT License) by 探微安全实验室 (Tanwei Security Lab). The original is a full Claude Code plugin with KPI reports, leaderboards, self-evolution tracking, and a Loop mode. The full plugin is available at [openpua.ai](https://openpua.ai).
-- **The 8-agent team structure** is the result of months of real-world iteration on what actually works for delegated AI coding.
+- **The 12-agent team structure** is the result of months of real-world iteration on what actually works for delegated AI coding.
 - **Core philosophy** is influenced by Chinese big-tech engineering culture — P-level role ladders, closure-oriented task management, the "three red lines" discipline, and the "never give up" corporate pressure culture.

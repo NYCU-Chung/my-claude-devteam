@@ -1,11 +1,9 @@
 {
-  "_comment_top": "Example Claude Code settings wiring all 11 hooks + generic safety rails. Copy to ~/.claude/settings.json and adjust hook paths if you installed the hooks somewhere other than ~/.claude/hooks/.",
-
+  "_comment_top": "Example Claude Code settings wiring all 15 hooks + generic safety rails. Copy to ~/.claude/settings.json and adjust hook paths if you installed the hooks somewhere other than ~/.claude/hooks/.",
   "permissions": {
     "defaultMode": "bypassPermissions",
     "_comment": "bypassPermissions = Claude Code will not prompt for each tool call. Use 'prompt' if you prefer to approve each tool call individually. The hooks below provide the safety net when permissions are bypassed."
   },
-
   "hooks": {
     "PreToolUse": [
       {
@@ -25,6 +23,11 @@
             "type": "command",
             "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const i=JSON.parse(d);const cmd=i.tool_input?.command||'';if(/--no-verify/.test(cmd)){process.stderr.write('[Hook] BLOCKED: --no-verify is not allowed. Let git hooks run.\\n');process.exit(2)}process.stdout.write(d)})\"",
             "description": "Block --no-verify flag (git hooks must run)"
+          },
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/branch-protection.js",
+            "description": "Block direct commits / force pushes on main / master / production"
           },
           {
             "type": "command",
@@ -62,9 +65,18 @@
             "description": "Check MCP server health before tool execution"
           }
         ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/large-file-warner.js",
+            "description": "Warn at 500KB, block at 2MB to protect context"
+          }
+        ]
       }
     ],
-
     "PostToolUse": [
       {
         "matcher": ".*",
@@ -99,11 +111,16 @@
             "command": "node ~/.claude/hooks/design-quality.js",
             "timeout": 10,
             "description": "Warn on generic template-looking frontend UI"
+          },
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/test-runner.js",
+            "timeout": 60,
+            "description": "Run sibling test files and report failures"
           }
         ]
       }
     ],
-
     "PostToolUseFailure": [
       {
         "matcher": "mcp__*",
@@ -116,7 +133,6 @@
         ]
       }
     ],
-
     "Stop": [
       {
         "matcher": "*",
@@ -136,23 +152,26 @@
             "type": "command",
             "command": "node ~/.claude/hooks/cost-tracker.js",
             "description": "Track token usage and estimated cost per response"
+          },
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/session-summary.js",
+            "description": "Append session summary to ~/.claude/sessions/ for later search"
           }
         ]
       }
     ],
-
     "SessionStart": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "echo '[Hooks] Session started — active: commit-quality, config-protection, suggest-compact, MCP health, audit-log, design-quality, batch-format, cost-tracker, error-log' >&2; exit 0"
+            "command": "echo '[Hooks] Session started — active: commit-quality, config-protection, suggest-compact, MCP health, audit-log, design-quality, batch-format, cost-tracker, error-log, test-runner, branch-protection, large-file-warner, session-summary' >&2; exit 0"
           }
         ]
       }
     ]
   },
-
   "alwaysThinkingEnabled": true,
   "effortLevel": "high"
 }
