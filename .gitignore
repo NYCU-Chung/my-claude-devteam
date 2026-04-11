@@ -1,0 +1,17 @@
+# Never commit local session data or secrets
+.DS_Store
+*.log
+*.jsonl
+metrics/
+error-log.md
+bash-commands.log
+mcp-health-cache.json
+
+# Node
+node_modules/
+*.tgz
+
+# Editor
+.vscode/
+.idea/
+*.swp

@@ -1,0 +1,158 @@
+{
+  "_comment_top": "Example Claude Code settings wiring all 11 hooks + generic safety rails. Copy to ~/.claude/settings.json and adjust hook paths if you installed the hooks somewhere other than ~/.claude/hooks/.",
+
+  "permissions": {
+    "defaultMode": "bypassPermissions",
+    "_comment": "bypassPermissions = Claude Code will not prompt for each tool call. Use 'prompt' if you prefer to approve each tool call individually. The hooks below provide the safety net when permissions are bypassed."
+  },
+
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "input=$(cat | jq -r '.input // empty'); if echo \"$input\" | grep -qE 'rm\\s+(-[a-zA-Z]*r[a-zA-Z]*f|--recursive.*--force|-rf)'; then echo 'BLOCKED: rm -rf is dangerous' >&2; exit 2; fi; exit 0",
+            "description": "Block rm -rf"
+          },
+          {
+            "type": "command",
+            "command": "input=$(cat | jq -r '.input // empty'); if echo \"$input\" | grep -qE 'git\\s+push.*(-f|--force).*\\s+(main|master)'; then echo 'BLOCKED: Force pushing to main/master is not allowed.' >&2; exit 2; fi; exit 0",
+            "description": "Block force push to main/master"
+          },
+          {
+            "type": "command",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const i=JSON.parse(d);const cmd=i.tool_input?.command||'';if(/--no-verify/.test(cmd)){process.stderr.write('[Hook] BLOCKED: --no-verify is not allowed. Let git hooks run.\\n');process.exit(2)}process.stdout.write(d)})\"",
+            "description": "Block --no-verify flag (git hooks must run)"
+          },
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/commit-quality.js",
+            "description": "Pre-commit: block debugger statements and secrets in staged files"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "filepath=$(cat | jq -r '.file_path // .filePath // empty'); if echo \"$filepath\" | grep -qE '\\.(env|pem|key)$|/secrets/|credentials'; then echo \"BLOCKED: Cannot modify sensitive file: $filepath\" >&2; exit 2; fi; exit 0",
+            "description": "Block writes to .env, .pem, .key, credentials files"
+          },
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/config-protection.js",
+            "description": "Block modifications to linter/formatter config files"
+          },
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/suggest-compact.js",
+            "description": "Suggest /compact every ~50 tool calls"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/mcp-health.js pre",
+            "description": "Check MCP server health before tool execution"
+          }
+        ]
+      }
+    ],
+
+    "PostToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/log-error.sh",
+            "description": "Record errors to ~/.claude/error-log.md"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/audit-log.js",
+            "description": "Audit log all bash commands with auto-redaction"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/accumulator.js",
+            "description": "Accumulate edited JS/TS files for batch format at Stop"
+          },
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/design-quality.js",
+            "timeout": 10,
+            "description": "Warn on generic template-looking frontend UI"
+          }
+        ]
+      }
+    ],
+
+    "PostToolUseFailure": [
+      {
+        "matcher": "mcp__*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/mcp-health.js failure",
+            "description": "Track MCP server failures with exponential backoff"
+          }
+        ]
+      }
+    ],
+
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/batch-format.js",
+            "timeout": 300,
+            "description": "Batch format (Prettier) + typecheck (tsc) all edited JS/TS files"
+          },
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/check-console.js",
+            "description": "Check for stray console.log in modified files"
+          },
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/cost-tracker.js",
+            "description": "Track token usage and estimated cost per response"
+          }
+        ]
+      }
+    ],
+
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[Hooks] Session started — active: commit-quality, config-protection, suggest-compact, MCP health, audit-log, design-quality, batch-format, cost-tracker, error-log' >&2; exit 0"
+          }
+        ]
+      }
+    ]
+  },
+
+  "alwaysThinkingEnabled": true,
+  "effortLevel": "high"
+}
