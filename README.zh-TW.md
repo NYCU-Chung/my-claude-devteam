@@ -122,26 +122,41 @@
 
 ---
 
-## 快速開始
+## 一鍵安裝
+
+```
+/plugin marketplace add NYCU-Chung/my-claude-devteam
+/plugin install devteam@my-claude-devteam
+```
+
+就這樣。8 個 agents 和 11 個 hooks 會自動註冊，重啟 Claude Code 就生效。
+
+### 建議：安裝方法論文件
+
+Plugin 已經把 **P7/P9/P10 方法論 + 三條紅線** 內建進每個 agent，但如果你想要整個 session 都用同一套紀律運作，建議把其中一個 `CLAUDE.md` 丟進 `~/.claude/CLAUDE.md`：
+
+```bash
+# 繁體中文
+curl -sL https://raw.githubusercontent.com/NYCU-Chung/my-claude-devteam/main/CLAUDE.zh-TW.md   -o ~/.claude/CLAUDE.md
+
+# English
+curl -sL https://raw.githubusercontent.com/NYCU-Chung/my-claude-devteam/main/CLAUDE.en.md   -o ~/.claude/CLAUDE.md
+```
+
+### 手動安裝（不用 plugin）
+
+如果不想用 plugin 系統：
 
 ```bash
 git clone https://github.com/NYCU-Chung/my-claude-devteam ~/my-claude-devteam
 
-# 備份現有設定（如果有）
-mv ~/.claude/CLAUDE.md ~/.claude/CLAUDE.md.bak 2>/dev/null
 mv ~/.claude/agents ~/.claude/agents.bak 2>/dev/null
-mv ~/.claude/hooks ~/.claude/hooks.bak 2>/dev/null
+mv ~/.claude/hooks  ~/.claude/hooks.bak  2>/dev/null
 
-# 安裝團隊
-cp ~/my-claude-devteam/CLAUDE.zh-TW.md ~/.claude/CLAUDE.md   # 或 CLAUDE.en.md
 cp -r ~/my-claude-devteam/agents ~/.claude/
-cp -r ~/my-claude-devteam/hooks ~/.claude/
-
-# 接上 hooks
+cp -r ~/my-claude-devteam/hooks  ~/.claude/
 cp ~/my-claude-devteam/settings.example.json ~/.claude/settings.json
-# （編輯路徑以符合你的 $HOME）
-
-# 重啟 Claude Code — 團隊就緒
+# （可選）cp ~/my-claude-devteam/CLAUDE.zh-TW.md ~/.claude/CLAUDE.md
 ```
 
 **驗證安裝：**

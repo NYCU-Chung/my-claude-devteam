@@ -1,0 +1,151 @@
+{
+  "description": "Claude Code Dev Team hooks: commit quality, cost tracking, MCP health, config protection, design quality, batch format, audit log, compact suggestion, error logging.",
+
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "input=$(cat | jq -r '.input // empty'); if echo \"$input\" | grep -qE 'rm\\s+(-[a-zA-Z]*r[a-zA-Z]*f|--recursive.*--force|-rf)'; then echo 'BLOCKED: rm -rf is dangerous' >&2; exit 2; fi; exit 0",
+            "description": "Block rm -rf"
+          },
+          {
+            "type": "command",
+            "command": "input=$(cat | jq -r '.input // empty'); if echo \"$input\" | grep -qE 'git\\s+push.*(-f|--force).*\\s+(main|master)'; then echo 'BLOCKED: Force pushing to main/master is not allowed.' >&2; exit 2; fi; exit 0",
+            "description": "Block force push to main/master"
+          },
+          {
+            "type": "command",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const i=JSON.parse(d);const cmd=i.tool_input?.command||'';if(/--no-verify/.test(cmd)){process.stderr.write('[devteam] BLOCKED: --no-verify is not allowed. Let git hooks run.\\n');process.exit(2)}process.stdout.write(d)})\"",
+            "description": "Block --no-verify flag (git hooks must run)"
+          },
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/commit-quality.js",
+            "description": "Pre-commit: block debugger statements and secrets in staged files"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "filepath=$(cat | jq -r '.file_path // .filePath // empty'); if echo \"$filepath\" | grep -qE '\\.(env|pem|key)$|/secrets/|credentials'; then echo \"BLOCKED: Cannot modify sensitive file: $filepath\" >&2; exit 2; fi; exit 0",
+            "description": "Block writes to .env, .pem, .key, credentials files"
+          },
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/config-protection.js",
+            "description": "Block modifications to linter/formatter config files"
+          },
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/suggest-compact.js",
+            "description": "Suggest /compact every ~50 tool calls"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/mcp-health.js pre",
+            "description": "Check MCP server health before tool execution"
+          }
+        ]
+      }
+    ],
+
+    "PostToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/log-error.sh",
+            "description": "Record errors to ~/.claude/error-log.md"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/audit-log.js",
+            "description": "Audit log all bash commands with auto-redaction"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/accumulator.js",
+            "description": "Accumulate edited JS/TS files for batch format at Stop"
+          },
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/design-quality.js",
+            "timeout": 10,
+            "description": "Warn on generic template-looking frontend UI"
+          }
+        ]
+      }
+    ],
+
+    "PostToolUseFailure": [
+      {
+        "matcher": "mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/mcp-health.js failure",
+            "description": "Track MCP server failures with exponential backoff"
+          }
+        ]
+      }
+    ],
+
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/batch-format.js",
+            "timeout": 300,
+            "description": "Batch format (Prettier) + typecheck (tsc) all edited JS/TS files"
+          },
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/check-console.js",
+            "description": "Check for stray console.log in modified files"
+          },
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/cost-tracker.js",
+            "description": "Track token usage and estimated cost per response"
+          }
+        ]
+      }
+    ],
+
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[devteam] Dev team online — 8 agents + 11 hooks active. Three red lines: closure discipline, fact-driven, exhaustiveness.' >&2; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

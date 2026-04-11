@@ -1,0 +1,31 @@
+{
+  "name": "devteam",
+  "version": "1.0.0",
+  "description": "An engineering team in a box for Claude Code. 8 specialized subagents (planner, fullstack-engineer, critic, debugger, vuln-verifier, frontend-designer, tool-expert, web-researcher) plus 11 automation hooks (pre-commit secret scan, MCP health tracking, cost tracking, batch format, design quality, config protection, and more) wired by the P7/P9/P10 methodology with three red lines: closure discipline, fact-driven, exhaustiveness.",
+  "author": {
+    "name": "NYCU-Chung",
+    "url": "https://github.com/NYCU-Chung"
+  },
+  "homepage": "https://github.com/NYCU-Chung/my-claude-devteam",
+  "repository": "https://github.com/NYCU-Chung/my-claude-devteam",
+  "license": "MIT",
+  "keywords": [
+    "subagents",
+    "agent-team",
+    "hooks",
+    "dev-team",
+    "code-review",
+    "security-audit",
+    "debugging",
+    "frontend-design",
+    "methodology",
+    "p7-p9-p10",
+    "three-red-lines",
+    "closure",
+    "fact-driven",
+    "exhaustiveness",
+    "cost-tracking",
+    "commit-quality",
+    "mcp-health"
+  ]
+}

@@ -122,26 +122,41 @@ Each hook is a self-contained script. Enable / disable / customize in `settings.
 
 ---
 
-## Quick Start
+## Install (One Command)
+
+```
+/plugin marketplace add NYCU-Chung/my-claude-devteam
+/plugin install devteam@my-claude-devteam
+```
+
+That's it. All 8 agents and 11 hooks are registered automatically. Restart Claude Code and your dev team is online.
+
+### Optional: install the methodology document
+
+The plugin ships with the **P7/P9/P10 methodology + three red lines** baked into each agent, but for the strongest effect, also drop one of the `CLAUDE.md` files into `~/.claude/CLAUDE.md` so the whole session operates under the same discipline:
+
+```bash
+# English
+curl -sL https://raw.githubusercontent.com/NYCU-Chung/my-claude-devteam/main/CLAUDE.en.md   -o ~/.claude/CLAUDE.md
+
+# Traditional Chinese
+curl -sL https://raw.githubusercontent.com/NYCU-Chung/my-claude-devteam/main/CLAUDE.zh-TW.md   -o ~/.claude/CLAUDE.md
+```
+
+### Manual install (without plugin)
+
+If you prefer not to use the plugin system:
 
 ```bash
 git clone https://github.com/NYCU-Chung/my-claude-devteam ~/my-claude-devteam
 
-# Backup existing config (if any)
-mv ~/.claude/CLAUDE.md ~/.claude/CLAUDE.md.bak 2>/dev/null
 mv ~/.claude/agents ~/.claude/agents.bak 2>/dev/null
-mv ~/.claude/hooks ~/.claude/hooks.bak 2>/dev/null
+mv ~/.claude/hooks  ~/.claude/hooks.bak  2>/dev/null
 
-# Install the team
-cp ~/my-claude-devteam/CLAUDE.zh-TW.md ~/.claude/CLAUDE.md   # or CLAUDE.en.md
 cp -r ~/my-claude-devteam/agents ~/.claude/
-cp -r ~/my-claude-devteam/hooks ~/.claude/
-
-# Wire up hooks
+cp -r ~/my-claude-devteam/hooks  ~/.claude/
 cp ~/my-claude-devteam/settings.example.json ~/.claude/settings.json
-# (edit the paths to match your $HOME)
-
-# Restart Claude Code — the team is ready
+# (optional) cp ~/my-claude-devteam/CLAUDE.en.md ~/.claude/CLAUDE.md
 ```
 
 **Verify the install:**
