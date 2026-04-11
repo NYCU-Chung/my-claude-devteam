@@ -191,7 +191,7 @@ Claude：[派出 fullstack-engineer 走 P7 方法論]
 
 ## License
 
-MIT。拿去、fork、出貨。歡迎署名但不強制。
+MIT 授權。自由使用、fork、修改。想掛名歡迎，不掛也沒關係。
 
 ---
 
