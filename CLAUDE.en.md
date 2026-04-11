@@ -1,40 +1,31 @@
 # CLAUDE.md
 
-A reusable Claude Code configuration with a 7-agent expert team, strict delegation rules, and a built-in P7/P9/P10 escalation methodology for large projects.
-
-> This is a sanitized template. Replace `[...]` placeholders with your own project details.
-
 ## Language
 
-Set your preferred response language here. Example:
-
-> **All responses must be in English.**
+**All responses must be in English.**
 
 ## Workflow
 
-For complex tasks (multiple files, architectural changes, or deployment operations), use TodoWrite first to list the plan, confirm with the user, then execute.
+For complex tasks (multiple files, architectural changes, deployment operations), use TodoWrite first to list the plan, confirm with the user, then execute.
 
-## 7-Agent Expert Team (Subagents)
+## 8-Agent Expert Team (Subagents)
 
-These seven subagents form a collaborative team. Call them with the `Agent` tool (pass the name below as `subagent_type`).
+Eight subagents form a collaborative team. Call them with the `Agent` tool (pass the name below as `subagent_type`).
 
 | Agent | Name | When to use |
 |-------|------|-------------|
-| Critic | `critic` | Code review, security review, plan review, pre-deploy check (includes security-auditor) |
+| Critic | `critic` | Code review, security review, plan review, pre-deploy check |
 | Vulnerability Verifier | `vuln-verifier` | After critic finds a vulnerability, writes an actual PoC to confirm it is real |
 | Tool Expert | `tool-expert` | Picking the best tool combination, chaining complex tool flows, debugging tool failures |
 | Fullstack Engineer | `fullstack-engineer` | Feature implementation (P7 methodology: design → implement → self-review → [P7-COMPLETION]) |
-| Frontend Designer | `frontend-designer` | New pages, UI redesign, landing pages, dashboards (rejects AI slop aesthetics) |
-| Debugger | `debugger` | Bug hunting, log analysis, service incidents, test failures (includes log-analyzer) |
+| Frontend Designer | `frontend-designer` | New pages, UI redesign, landing pages, dashboards (rejects AI slop) |
+| Debugger | `debugger` | Bug hunting, log analysis, service incidents, test failures |
 | Planner | `planner` | Task decomposition (P9 methodology: strategic breakdown → Task Prompt → delivery closure) |
-
-> These subagents are defined as `.md` files under `~/.claude/agents/`. Each file has its own system prompt and tool permissions. Extend or replace as needed.
+| Web Researcher | `web-researcher` | Looking up official docs, API specs, error codes, version differences |
 
 ---
 
-## P7/P9/P10 Methodology (Built-in, No External Plugins Required)
-
-> Adapted from [tanweai/pua](https://github.com/tanweai/pua) (MIT License, author: 探微安全实验室 / Tanwei Security Lab, homepage: https://openpua.ai). The original is a full Claude Code plugin; this section distills the core methodology into CLAUDE.md so users do not need to install an external plugin. For the full feature set (KPI reports, leaderboards, self-evolution tracking, Loop mode, etc.) install the original plugin directly.
+## P7/P9/P10 Methodology
 
 Inspired by Chinese big-tech corporate culture (P7 senior engineer / P9 tech lead / P10 CTO role ladders). This is **not role-play** — it is mode switching based on task scope. Claude switches modes internally. No external subagent calls required.
 
@@ -182,15 +173,15 @@ Complex project: switch to P9 mode (planner) to decompose
 ```
 # Regular feature implementation
 Agent(subagent_type="fullstack-engineer",
-  prompt="Add POST endpoint in app/api/[endpoint]/route.ts that accepts {...} and writes to DB. Schema at prisma/schema.prisma. Deliver with [P7-COMPLETION].")
+  prompt="Add a POST endpoint at app/api/users/route.ts that accepts { name, email } and writes to the prisma User table. Deliver with [P7-COMPLETION].")
 
 # Pre-deploy review
 Agent(subagent_type="critic",
-  prompt="Review this diff. List all issues with file paths + line numbers + fix direction: [diff]")
+  prompt="Review this diff. List all issues with file paths + line numbers + fix direction: ...")
 
 # Bug investigation
 Agent(subagent_type="debugger",
-  prompt="[service-name] crashed. Investigate logs, find root cause, and fix.")
+  prompt="Users see a white screen after clicking the login button, no console errors. Find the root cause and fix it.")
 
 # Parallel review (independent tasks dispatched together)
 Agent(subagent_type="critic", prompt="Review frontend changes...")   # ← same message
@@ -203,45 +194,14 @@ Agent(subagent_type="critic", prompt="Review backend changes...")    # ← runs 
 
 **For any uncertain technical question (API endpoints, payload formats, SDK usage, error codes), immediately use WebSearch to consult official documentation. Guessing or relying on potentially stale memory is strictly forbidden.**
 
-## Page Verification (Claude in Chrome)
+## Page Verification (Optional)
 
-**After any page modification or addition, always use Claude in Chrome to verify the page before marking deployment complete.**
-
-Flow:
-1. After deployment, use `mcp__claude-in-chrome__tabs_context_mcp` to get current tab state
-2. Use `mcp__claude-in-chrome__navigate` to open the affected page
-3. Use `mcp__claude-in-chrome__read_page` or `mcp__claude-in-chrome__computer` to screenshot and verify
-4. Fix any issues found and redeploy
-
-## Error Log & Knowledge Base
-
-When an error is resolved, record the solution in MCP memory for future reference:
-
-```
-mcp__plugin_claude-mem_mcp-search__save_observation(
-  text="Error: [summary] | Solution: [steps]",
-  title="[tool/service name] fix"
-)
-```
-
-When encountering similar errors, search past solutions first:
-```
-mcp__plugin_claude-mem_mcp-search__search(query="[error keyword]")
-```
+If Claude in Chrome (or any equivalent browser automation tool) is installed, use it to open and screenshot affected pages after deployment to verify the rendered result. Skip this section if no browser automation is available — it is not mandatory.
 
 ---
 
-## How to use this template
-
-1. **Copy** this file to `~/.claude/CLAUDE.md`
-2. **Create the subagents** — put `critic.md`, `debugger.md`, `planner.md`, etc. under `~/.claude/agents/`. Each file is a markdown document describing the agent's role. See [Claude Code subagents docs](https://docs.claude.com/en/docs/claude-code/sub-agents) for the format.
-3. **Customize the delegation rules** — the tables above are opinionated. Adjust to your own workflow.
-4. **Add project-specific sections below** — your own `## Infrastructure`, `## GitHub Repositories`, `## Deployment` etc. (NOT in this public template, for security reasons).
-
-The P7/P9/P10 methodology is **self-contained** — no external plugin required. Claude reads this file and switches modes based on task scope.
-
 ## Credits
 
-- **P7/P9/P10 methodology and PUA mode**: adapted from [tanweai/pua](https://github.com/tanweai/pua) (MIT License) by 探微安全实验室 (Tanwei Security Lab). The full plugin is available at [openpua.ai](https://openpua.ai) and includes advanced features like KPI reports, leaderboards, self-evolution tracking, and Loop mode.
-- **7-agent team structure**: the result of months of real-world iteration on what actually works for delegated AI coding.
-- **Core philosophy**: influenced by Chinese big-tech engineering culture — P-level role ladders, closure-oriented task management, the "three red lines" discipline, and the "never give up" corporate pressure culture.
+- **P7/P9/P10 methodology and PUA mode** are adapted from [tanweai/pua](https://github.com/tanweai/pua) (MIT License) by 探微安全实验室 (Tanwei Security Lab). The original is a full Claude Code plugin with KPI reports, leaderboards, self-evolution tracking, and a Loop mode. The full plugin is available at [openpua.ai](https://openpua.ai).
+- **The 8-agent team structure** is the result of months of real-world iteration on what actually works for delegated AI coding.
+- **Core philosophy** is influenced by Chinese big-tech engineering culture — P-level role ladders, closure-oriented task management, the "three red lines" discipline, and the "never give up" corporate pressure culture.
