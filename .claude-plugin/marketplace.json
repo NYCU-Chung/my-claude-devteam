@@ -4,6 +4,9 @@
     "name": "NYCU-Chung",
     "url": "https://github.com/NYCU-Chung"
   },
+  "metadata": {
+    "description": "Claude Code Dev Team — 12 specialized subagents + 15 automation hooks + P7/P9/P10 methodology."
+  },
   "plugins": [
     {
       "name": "devteam",
