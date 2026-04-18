@@ -171,7 +171,7 @@ Most reported "vulnerabilities" are false positives or partially true. The **PoC
 /plugin install devteam@my-claude-devteam
 ```
 
-That's it. All 12 agents and 15 hooks are registered automatically. Restart Claude Code and your dev team is online.
+Once installed, all 12 agents and 15 hooks register automatically. Restart Claude Code and your dev team is online.
 
 ### Optional: install the methodology document
 
