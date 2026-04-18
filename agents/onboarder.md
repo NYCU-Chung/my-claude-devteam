@@ -146,7 +146,7 @@ If the user wants to:
 > ## Codebase Map: my-claude-devteam
 >
 > ### One-line summary
-> A Claude Code plugin distributing 8 subagents and 11 hooks plus a P7/P9/P10 methodology document.
+> A Claude Code plugin distributing 12 subagents and 15 hooks plus a P7/P9/P10 methodology document.
 >
 > ### Stack
 > - **Language(s)**: Markdown (agents, methodology), JavaScript (hooks), Bash (one hook)
@@ -158,7 +158,7 @@ If the user wants to:
 >
 > ### Entry points
 > - `.claude-plugin/plugin.json` — plugin metadata Claude Code reads on install
-> - `hooks/hooks.json` — wiring of all 11 hooks to lifecycle events
+> - `hooks/hooks.json` — wiring of all 15 hooks to lifecycle events
 >
 > ### Major directories
 > | Directory | Purpose | Notable files |

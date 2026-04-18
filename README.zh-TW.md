@@ -7,7 +7,7 @@
 
 大多數人把 Claude Code 當單人工程師用。這個設定把它變成一整個工程組織：**planner、fullstack-engineer、refactor-specialist、migration-engineer、frontend-designer、critic、vuln-verifier、debugger、db-expert、onboarder、tool-expert、web-researcher** — 每個 agent 負責一個角色、擁有各自的工具權限，並由嚴格的委派規則決定誰該動哪裡。
 
-背後有 **阿里味大廠文化的紀律**（閉環意識、事實驅動、窮盡一切），搭配 **實戰打磨的 hooks**，在 debugger 語句、硬編密碼、成本失控、MCP 斷線等問題進 main 之前就攔下來。
+背後有 **大廠工程文化的紀律**（閉環意識、事實驅動、窮盡一切），搭配 **實戰打磨的 hooks**，在 debugger 語句、硬編密碼、成本失控、MCP 斷線等問題進 main 之前就攔下來。
 
 ---
 
@@ -171,7 +171,7 @@
 /plugin install devteam@my-claude-devteam
 ```
 
-就這樣。8 個 agents 和 11 個 hooks 會自動註冊，重啟 Claude Code 就生效。
+安裝完成後，12 個 agents 與 15 個 hooks 會自動註冊；重啟 Claude Code 即可生效。
 
 ### 建議：安裝方法論文件
 
@@ -226,8 +226,8 @@ Claude：[派出 fullstack-engineer 走 P7 方法論]
 ## Credits
 
 - **P7/P9/P10 方法論與 PUA 模式** 改編自 [**tanweai/pua**](https://github.com/tanweai/pua)（MIT License），作者為探微安全实验室。原版是完整的 Claude Code plugin，包含 KPI 報告、排行榜、自進化追蹤、Loop 模式等進階功能。想要完整功能可以直接從 [openpua.ai](https://openpua.ai) 安裝。
-- **7 人團隊結構與 hooks** 是多個月實戰迭代的產物 — 出貨到 production、被燒、再迭代。
-- **核心哲學** 受中國大廠工程文化影響：P 職級體系、閉環導向任務管理、「三條紅線」紀律、以及經典的 厚黑 PUA 壓力文化，把「差不多就好」變成「窮盡一切」。
+- **12 人團隊結構與 hooks** 是多個月實戰迭代的產物 — 出貨到 production、踩坑、再迭代。
+- **核心哲學** 受中國大廠工程文化影響：P 職級體系、閉環導向任務管理、「三條紅線」紀律、以及把「差不多就好」變成「窮盡一切」的高壓工程文化。
 
 ---
 

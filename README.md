@@ -171,7 +171,7 @@ Most reported "vulnerabilities" are false positives or partially true. The **PoC
 /plugin install devteam@my-claude-devteam
 ```
 
-That's it. All 8 agents and 11 hooks are registered automatically. Restart Claude Code and your dev team is online.
+That's it. All 12 agents and 15 hooks are registered automatically. Restart Claude Code and your dev team is online.
 
 ### Optional: install the methodology document
 
@@ -226,7 +226,7 @@ This repo is **opinionated methodology + tools**, not a kitchen sink. You still 
 ## Credits
 
 - **P7/P9/P10 methodology and PUA mode** are adapted from [**tanweai/pua**](https://github.com/tanweai/pua) (MIT License) by 探微安全实验室 (Tanwei Security Lab). The original is a full Claude Code plugin with KPI reports, leaderboards, self-evolution tracking, and a Loop mode. If you want the full feature set, install it directly from [openpua.ai](https://openpua.ai).
-- **The 7-agent team structure and hooks** are the result of months of real-world iteration — shipping to production, getting burned, iterating again.
+- **The 12-agent team structure and hooks** are the result of months of real-world iteration — shipping to production, getting burned, iterating again.
 - **Core philosophy** is inspired by Chinese big-tech engineering culture: P-level role ladders, closure-oriented task management, the "three red lines" discipline, and the corporate pressure culture that turns "good enough" into "exhaust every option".
 
 ---
